@@ -21,7 +21,7 @@ module.exports = (con) => {
 
     con.query("DROP TABLE IF EXISTS relationship", function (err, result) {
         if (err) throw err;
-        console.log("DELTED TABLE : relationship");
+        console.log("DELETED TABLE : relationship");
     });
 
     con.query("CREATE TABLE IF NOT EXISTS teachers (email VARCHAR(255))", function (err, result) {
