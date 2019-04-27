@@ -3,6 +3,7 @@ const mysql = require('mysql');
 
 const routes = require('./routes');
 const config = require('./config');
+const seed = require('./seed');
 
 const hostname = config.HOSTNAME;
 const port = config.PORT || 3000;
@@ -16,12 +17,13 @@ const con = mysql.createConnection({
 con.connect(function (err) {
   if (err) throw err;
   console.log(`Connected to MYSQL:${config.MYSQL_HOSTNAME}`);
+  seed(con);
 });
 
 const server = http.createServer((req, res) => {
 
   // Check if request is an api call
-  if((/^\/api/).test(req.url)){
+  if ((/^\/api/).test(req.url)) {
     routes(req, res, con);
   }
 
