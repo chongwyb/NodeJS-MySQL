@@ -2,19 +2,20 @@ const http = require('http');
 const mysql = require('mysql');
 
 const routes = require('./routes');
+const config = require('./config');
 
-const hostname = '127.0.0.1';
-const port = 3000;
+const hostname = config.HOSTNAME;
+const port = config.PORT || 3000;
 
 const con = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "password"
+  host: config.MYSQL_HOSTNAME,
+  user: config.MYSQL_USERNAME,
+  password: config.MYSQL_PASSWORD
 });
 
 con.connect(function (err) {
   if (err) throw err;
-  console.log("Connected!");
+  console.log(`Connected to MYSQL:${config.MYSQL_HOSTNAME}`);
 });
 
 const server = http.createServer((req, res) => {
