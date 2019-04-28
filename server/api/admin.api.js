@@ -95,12 +95,37 @@ var commonstudents = (req, res, con) => {
 
 }
 
+/**
+ * Description:
+ * Set a specified student's suspended = TRUE
+ */
 var suspend = (req, res, con) => {
     console.log('POST/api/suspend');
-    // TODO: Add Logic
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end(req.url);
+
+    let body = '';
+    req.on('data', chunk => {
+        body += chunk.toString(); // convert Buffer to string
+    });
+    req.on('end', () => {
+        body = JSON.parse(body);
+
+        var student = body.student;
+
+        var query = "UPDATE students SET suspended = 1 WHERE email = '" + student + "'";
+
+        con.query(query, function (err, result) {
+            if (err) {
+                // console.log(err);
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ "status": 400, "message": "error suspending students" }));
+            } else {
+                // console.log(result);
+                res.statusCode = 204;
+                res.end();
+            };
+        });
+    });
 }
 
 var retrievefornotifications = (req, res, con) => {
