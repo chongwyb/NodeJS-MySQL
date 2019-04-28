@@ -8,6 +8,7 @@ module.exports = {
   MYSQL_USERNAME: 'root',
   MYSQL_PASSWORD: 'password', // Enter root password
   MYSQL_HOSTNAME: 'localhost',
+  MYSQL_DATABASE: 'school',
   MYSQL_PORT: 3306,
   MYSQL_LOGGING: console.log,
 
