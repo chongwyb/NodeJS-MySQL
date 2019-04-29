@@ -25,7 +25,6 @@ con.connect(function (err) {
 
 const server = http.createServer((req, res) => {
 
-  console.log(req.url);
   // Check if request is an api call
   if ((/^\/api/).test(req.url)) {
     routes(req, res, con);

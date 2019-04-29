@@ -128,12 +128,64 @@ var suspend = (req, res, con) => {
     });
 }
 
+/**
+ * Description:
+ * Retrieve all student_email given a teacher_email
+ * split notification delimiter ' ' get regex (^@ ... @ ... \. ... &)
+ * merge both datasets' distinct student_email together
+ */
 var retrievefornotifications = (req, res, con) => {
     console.log('POST/api/retrievefornotifications');
-    // TODO: Add Logic
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end(req.url);
+
+    let body = '';
+    req.on('data', chunk => {
+        body += chunk.toString(); // convert Buffer to string
+    });
+    req.on('end', () => {
+        body = JSON.parse(body);
+
+        var teacher = body.teacher;
+
+        var query = "SELECT student_email FROM relationship WHERE teacher_email = '" + teacher + "'";
+
+        con.query(query, function (err, result) {
+            if (err) {
+                // console.log(err);
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ "status": 400, "message": "error suspending students" }));
+            } else {
+                var notification = body.notification;
+                var parts = notification.split(' ');
+                // var simpleEmailRegex = /^@.+@.+\..+/mi;
+                var advanceEmailRegex = /^@(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/mi;
+                var sievedEmails = [];
+                for (var i = 0; i < parts.length; i++) {
+                    if ((advanceEmailRegex).test(parts[i])) {
+                        sievedEmails.push(parts[i].substring(1));
+                    };
+                };
+                // console.log(sievedEmails);
+                // console.log(result);
+                var recipients = [];
+                if (result.length == 0) {
+                    recipients = sievedEmails;
+                } else {                    
+                    for (var i = 0; i < result.length; i++) {
+                        recipients.push(result[i].student_email)
+                    }
+                    for (var i = 0; i < sievedEmails.length; i++) {
+                        if (recipients.indexOf(sievedEmails[i]) == -1) {
+                            recipients.push(sievedEmails[i]);
+                        }
+                    }                    
+                }
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ "recipients": recipients }));
+            };
+        });
+    });
 }
 
 module.exports = {
