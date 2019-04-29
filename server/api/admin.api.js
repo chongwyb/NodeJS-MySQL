@@ -3,7 +3,7 @@ var url = require('url');
 /**
  * Description:
  * Set a unique composite key of (teacher_email, student_email)
- * Assumption:
+ * Condition:
  * Teacher / Student exists in the respective database table
  * @param {*} req - request (http.IncomingMessage)
  * @param {*} res - response (http.ServerResponse)
@@ -128,6 +128,8 @@ var suspend = (req, res, con) => {
  * Retrieve all student_email given a teacher_email
  * split notification delimiter ' ' get regex (^@ ... @ ... \. ... &)
  * merge both datasets' distinct student_email together
+ * Condition:
+ * Teacher / Student exists in the respective database table
  */
 var retrievefornotifications = (req, res, con) => {
     console.log('POST/api/retrievefornotifications');
@@ -141,7 +143,28 @@ var retrievefornotifications = (req, res, con) => {
 
         var teacher = body.teacher;
 
-        var query = "SELECT student_email FROM relationship WHERE teacher_email = '" + teacher + "'";
+
+        var query = "SELECT DISTINCT s.email AS 'student_email' FROM teachers t, relationship r , students s\
+        WHERE (r.teacher_email = t.email AND r.student_email = s.email AND s.suspended = 0 AND r.teacher_email = '"+ teacher + "')";
+
+        var notification = body.notification;
+        var parts = notification.split(' ');
+        // var simpleEmailRegex = /^@.+@.+\..+/mi;
+        var advanceEmailRegex = /^@(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/mi;
+        var sievedEmails = [];
+        for (var i = 0; i < parts.length; i++) {
+            if ((advanceEmailRegex).test(parts[i])) {
+                sievedEmails.push(parts[i].substring(1));
+            };
+        };
+
+        if (sievedEmails.length > 0) {
+            query += "OR (r.student_email IN(";
+            for (var i = 0; i < sievedEmails.length; i++) {
+                query += "'" + sievedEmails[i] + "'";
+            }
+            query += ") AND s.suspended = 0)";
+        }
 
         con.query(query, function (err, result) {
             if (err) {
@@ -150,30 +173,10 @@ var retrievefornotifications = (req, res, con) => {
                 res.setHeader('Content-Type', 'application/json');
                 res.end(JSON.stringify({ "message": "error retrieving students eligible for notifications" }));
             } else {
-                var notification = body.notification;
-                var parts = notification.split(' ');
-                // var simpleEmailRegex = /^@.+@.+\..+/mi;
-                var advanceEmailRegex = /^@(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/mi;
-                var sievedEmails = [];
-                for (var i = 0; i < parts.length; i++) {
-                    if ((advanceEmailRegex).test(parts[i])) {
-                        sievedEmails.push(parts[i].substring(1));
-                    };
-                };
-                // console.log(sievedEmails);
                 // console.log(result);
                 var recipients = [];
-                if (result.length == 0) {
-                    recipients = sievedEmails;
-                } else {                    
-                    for (var i = 0; i < result.length; i++) {
-                        recipients.push(result[i].student_email)
-                    }
-                    for (var i = 0; i < sievedEmails.length; i++) {
-                        if (recipients.indexOf(sievedEmails[i]) == -1) {
-                            recipients.push(sievedEmails[i]);
-                        }
-                    }                    
+                for (var i = 0; i < result.length; i++) {
+                    recipients.push(result[i].student_email)
                 }
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
