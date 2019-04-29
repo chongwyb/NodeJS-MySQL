@@ -13,7 +13,13 @@ module.exports = (req, res, con) => {
     // Parse the api routes here
     const request = req.method + url.parse(req.url).pathname;
     // Pass the req, res, mysql to the selected route
-    map[request](req, res, con);
-    // TODO: Route not found
+    const route = map[request];
+    if(route){
+        route(req, res, con);
+    }else{
+        res.statusCode = 404;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({"message": "api method not found"}))
+    }
 
 }
