@@ -36,12 +36,10 @@ var register = (req, res, con) => {
                 // console.log(err);
                 res.statusCode = 400;
                 res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ "status": 400, "message": "error registering students" }));
+                res.end(JSON.stringify({ "message": "error registering students" }));
             } else {
                 // console.log(result);
                 res.statusCode = 204;
-                // res.setHeader('Content-Type', 'application/json');
-                // res.end(JSON.stringify({ "status": 204, "message": "successfully registered students" }));
                 res.end();
             };
         });
@@ -75,21 +73,18 @@ var commonstudents = (req, res, con) => {
             // console.log(err);
             res.statusCode = 400;
             res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ "status": 400, "message": "error retrieving common students" }));
+            res.end(JSON.stringify({ "message": "error retrieving common students" }));
         } else {
             // console.log(result);
             var students = [];
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            // res.end(JSON.stringify({ "status": 204, "message": "successfully retrieved common students" }));
-            if (result.length == 0) {
-                res.end(JSON.stringify({ "students": students }));
-            } else {
+            if (result.length > 0) {
                 for (var i = 0; i < result.length; i++) {
                     students.push(result[i].student_email)
                 }
-                res.end(JSON.stringify({ "students": students }));
             }
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ "students": students }));
         };
     });
 
@@ -118,7 +113,7 @@ var suspend = (req, res, con) => {
                 // console.log(err);
                 res.statusCode = 400;
                 res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ "status": 400, "message": "error suspending students" }));
+                res.end(JSON.stringify({ "message": "error suspending students" }));
             } else {
                 // console.log(result);
                 res.statusCode = 204;
@@ -153,7 +148,7 @@ var retrievefornotifications = (req, res, con) => {
                 // console.log(err);
                 res.statusCode = 400;
                 res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ "status": 400, "message": "error suspending students" }));
+                res.end(JSON.stringify({ "message": "error retrieving students eligible for notifications" }));
             } else {
                 var notification = body.notification;
                 var parts = notification.split(' ');
