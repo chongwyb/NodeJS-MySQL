@@ -5,6 +5,7 @@ const routes = require('./routes');
 const config = require('./config');
 const database = require('./database');
 const seed = require('./seed');
+const test = require('./tests/main');
 
 const hostname = config.HOSTNAME;
 const port = config.PORT || 3000;
@@ -21,6 +22,7 @@ con.connect(function (err) {
   console.log(`Connected to MYSQL:${config.MYSQL_HOSTNAME}`);
   database(con);
   seed(con);
+  test();
 });
 
 const server = http.createServer((req, res) => {
