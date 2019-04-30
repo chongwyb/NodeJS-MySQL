@@ -17,6 +17,7 @@ In /server/config/development.js, set the reference to MYSQL connection accordin
 ### Launching the application
 Install the necessary NPM packages
 `$ npm i`
+
 Start the application
 `$ npm run start:dev`
 
