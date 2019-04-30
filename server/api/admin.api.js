@@ -49,24 +49,27 @@ var register = (req, res, con) => {
 /**
  * Description:
  * Given a set of teacher_email values of x, locate duplicates of student_email where count = x
+ * Condition:
+ * teacher_emails are distinct
  */
 var commonstudents = (req, res, con) => {
     console.log('GET/api/commonstudents');
 
     var parts = url.parse(req.url, true);
     var teachers = parts.query.teacher;
+    var distinct = [...new Set(teachers)];
 
     var query = "SELECT count(*) as c, student_email FROM relationship WHERE ";
 
-    for (var i = 0; i < teachers.length; i++) {
+    for (var i = 0; i < distinct.length; i++) {
         if (i > 0) {
-            query += " OR teacher_email = '" + teachers[i] + "'";
+            query += " OR teacher_email = '" + distinct[i] + "'";
         } else {
-            query += "teacher_email = '" + teachers[i] + "'";
+            query += "teacher_email = '" + distinct[i] + "'";
         }
     };
 
-    query += 'GROUP BY student_email HAVING c = ' + teachers.length;
+    query += 'GROUP BY student_email HAVING c = ' + distinct.length;
 
     con.query(query, function (err, result) {
         if (err) {
@@ -161,8 +164,9 @@ var retrievefornotifications = (req, res, con) => {
         if (sievedEmails.length > 0) {
             query += "OR (r.student_email IN(";
             for (var i = 0; i < sievedEmails.length; i++) {
-                query += "'" + sievedEmails[i] + "'";
+                query += "'" + sievedEmails[i] + "',";
             }
+            query = query.substring(0, query.length - 1);
             query += ") AND s.suspended = 0)";
         }
 
