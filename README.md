@@ -38,11 +38,3 @@ module.exports = async () => {
     // <test case>(); custom unit tests
 }
 ```
-
-
-
-
-public folder assets might be called as request which does not start with /api
-request - http.IncomingMessage
-response - http.ServerResponse
-npm mysql does not require SQL_SAFE_UPDATES, workbench does
