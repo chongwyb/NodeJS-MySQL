@@ -4,21 +4,6 @@ module.exports = (con) => {
         console.log("CREATED DATABASE : school");
     });
 
-    con.query("DROP TABLE IF EXISTS teachers", function (err, result) {
-        if (err) throw err;
-        console.log("DELETED TABLE : teachers");
-    });
-
-    con.query("DROP TABLE IF EXISTS students", function (err, result) {
-        if (err) throw err;
-        console.log("DELETED TABLE : students");
-    });
-
-    con.query("DROP TABLE IF EXISTS relationship", function (err, result) {
-        if (err) throw err;
-        console.log("DELETED TABLE : relationship");
-    });
-
     /**
      * TABLE :
      *  teachers
@@ -54,5 +39,20 @@ module.exports = (con) => {
     con.query("CREATE TABLE IF NOT EXISTS relationship (teacher_email VARCHAR(255) NOT NULL, student_email VARCHAR(255) NOT NULL, CONSTRAINT email_pair PRIMARY KEY(teacher_email, student_email))", function (err, result) {
         if (err) throw err;
         console.log("CREATED TABLE : relationship");
+    });
+
+    con.query("DROP TABLE IF EXISTS teachers", function (err, result) {
+        if (err) throw err;
+        console.log("DROP TABLE : teachers");
+    });
+
+    con.query("DROP TABLE IF EXISTS students", function (err, result) {
+        if (err) throw err;
+        console.log("DROP TABLE : students");
+    });
+
+    con.query("DROP TABLE IF EXISTS relationship", function (err, result) {
+        if (err) throw err;
+        console.log("DROP TABLE : relationship");
     });
 }
