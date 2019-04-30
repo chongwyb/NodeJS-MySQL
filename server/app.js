@@ -17,12 +17,12 @@ const con = mysql.createConnection({
   database: config.MYSQL_DATABASE,
 });
 
-con.connect(function (err) {
+con.connect(async (err) => {
   if (err) throw err;
   console.log(`Connected to MYSQL:${config.MYSQL_HOSTNAME}`);
   database(con);
-  seed(con);
-  test();
+  // await seed(con);
+  // test();
 });
 
 const server = http.createServer((req, res) => {
