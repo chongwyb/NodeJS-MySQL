@@ -80,12 +80,12 @@ var register = (req, res, con) => {
                                     };
                                 });
                             } else {
-                                utils.resError(res, 400, "error registering students");
+                                utils.resError(res, 412, "error registering students");
                             }
                         }
                     })
                 } else {
-                    utils.resError(res, 400, "error registering students");
+                    utils.resError(res, 412, "error registering students");
                 }
             };
         });
@@ -148,7 +148,7 @@ var commonstudents = (req, res, con) => {
                 con.query(actualQuery, function (err, result) {
                     if (err) {
                         // console.log(err);
-                        utils.resError(res, 400, "error retrieving common students");
+                        utils.resError(res, 412, "error retrieving common students");
                     } else {
                         // console.log(result);
                         var students = [];
@@ -163,7 +163,7 @@ var commonstudents = (req, res, con) => {
                     };
                 });
             } else {
-                utils.resError(res, 400, "error retrieving common students");
+                utils.resError(res, 412, "error retrieving common students");
             }
         }
     });
@@ -189,9 +189,9 @@ var suspend = (req, res, con) => {
         var student = body.student;
 
         // Check for invalid parameters
-        if(!student) {
+        if (!student) {
             utils.resError(res, 400, 'Invalid parameters');
-        }else{
+        } else {
             var check = true;
             check = defaultEmailRegex.test(student);
             if (!check) {
@@ -209,7 +209,7 @@ var suspend = (req, res, con) => {
             if (err) {
                 utils.resError(res, 502, "database query error");
             } else {
-                if(result.length == 1){
+                if (result.length == 1) {
                     con.query(actualQuery, function (err, result) {
                         if (err) {
                             // console.log(err);
@@ -220,8 +220,8 @@ var suspend = (req, res, con) => {
                             res.end();
                         };
                     });
-                }else{
-                    utils.resError(res, 400, "error suspending students");
+                } else {
+                    utils.resError(res, 412, "error suspending students");
                 }
             }
         });
@@ -253,9 +253,9 @@ var retrievefornotifications = (req, res, con) => {
         var notification = body.notification;
 
         // Check for invalid parameters
-        if(!teacher){
+        if (!teacher) {
             utils.resError(res, 400, 'Invalid parameters');
-        }else{
+        } else {
             var check = true;
             check = defaultEmailRegex.test(teacher);
             if (!check) {
@@ -289,7 +289,7 @@ var retrievefornotifications = (req, res, con) => {
             if (err) {
                 utils.resError(res, 502, "database query error");
             } else {
-                if(result.length == 1){
+                if (result.length == 1) {
                     con.query(actualQuery, function (err, result) {
                         if (err) {
                             // console.log(err);
@@ -306,7 +306,7 @@ var retrievefornotifications = (req, res, con) => {
                         };
                     });
                 } else {
-                    utils.resError(res, 400, "error retrieving students eligible for notifications");
+                    utils.resError(res, 412, "error retrieving students eligible for notifications");
                 };
             };
         });
