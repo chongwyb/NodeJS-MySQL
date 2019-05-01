@@ -12,5 +12,8 @@ module.exports = {
   MYSQL_PORT: 3306,
   MYSQL_LOGGING: console.log,
 
+  SEED: false,
+  TEST: false,
+
   version: '1.0.0'
 };

@@ -21,8 +21,14 @@ con.connect(async (err) => {
   if (err) throw err;
   console.log(`Connected to MYSQL:${config.MYSQL_HOSTNAME}`);
   await database(con);
-  // await seed(con);
-  // await test();
+
+  if(config.SEED){
+    await seed(con);
+  }
+
+  if(config.TEST){
+    await test();
+  }
 });
 
 const server = http.createServer((req, res) => {

@@ -6,7 +6,7 @@ Refer to the setup guide [here](./SETUP.md)
 ## Running the application
 
 ### Set database connection
-In /server/config/development.js, set the reference to MYSQL connection accordingly.
+In /server/config/development.js, set the connection details to MYSQL accordingly.
 ```javascript
   MYSQL_USERNAME: '<username>',
   MYSQL_PASSWORD: '<password>',
@@ -28,14 +28,15 @@ $ npm run start:dev
 ## Unit test
 
 ### Base unit tests
-In /server/app.js, uncomment the code for the database seed and unit tests
+In /server/config/development.js, enable for the database seed and unit tests.
 ```javascript
-  await seed(con); // uncomment this line
-  test(); // uncomment this line
+  SEED: true,
+  TEST: true,
 ```
+Re-run the application.
 
 ### Custom unit tests
-To include custom test cases, set them in /server.tests/main.js
+IN /server.tests/main.js, replace the base test cases with the custom test cases.
 ```javascript
 // const <test case> = require('./<path to file>');
 
@@ -43,3 +44,4 @@ module.exports = async () => {
     // <test case>(); custom unit tests
 }
 ```
+Re-run the application.
