@@ -20,9 +20,9 @@ const con = mysql.createConnection({
 con.connect(async (err) => {
   if (err) throw err;
   console.log(`Connected to MYSQL:${config.MYSQL_HOSTNAME}`);
-  database(con);
+  await database(con);
   // await seed(con);
-  // test();
+  // await test();
 });
 
 const server = http.createServer((req, res) => {
