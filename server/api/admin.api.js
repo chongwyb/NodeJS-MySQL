@@ -101,9 +101,6 @@ var register = (req, res, con) => {
 var commonstudents = (req, res, con) => {
     console.log('GET/api/commonstudents');
 
-    // TODO: Check for invalid parameters, return 400
-    // TODO: Check for mysql error msgs, return 502 w/o mentioning msg related to code issues
-
     var parts = url.parse(req.url, true);
     var teachers = parts.query.teacher;
     var distinct = [];
@@ -188,9 +185,6 @@ var suspend = (req, res, con) => {
     req.on('end', () => {
         body = JSON.parse(body);
 
-        // TODO: Check for invalid parameters, return 400
-        // TODO: Check for mysql error msgs, return 502 w/o mentioning msg related to code issues
-
         var student = body.student;
 
         // Check for invalid parameters
@@ -251,9 +245,6 @@ var retrievefornotifications = (req, res, con) => {
     });
     req.on('end', () => {
         body = JSON.parse(body);
-
-        // TODO: Check for invalid parameters, return 400
-        // TODO: Check for mysql error msgs, return 502 w/o mentioning msg related to code issues
 
         var teacher = body.teacher;
         var notification = body.notification;

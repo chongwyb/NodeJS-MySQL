@@ -36,7 +36,7 @@ In /server/config/development.js, enable for the database seed and unit tests.
 Re-run the application.
 
 ### Custom unit tests
-IN /server.tests/main.js, replace the base test cases with the custom test cases.
+In /server.tests/main.js, replace the base test cases with the custom test cases.
 ```javascript
 // const <test case> = require('./<path to file>');
 
