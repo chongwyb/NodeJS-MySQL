@@ -40,7 +40,7 @@ module.exports = async (http, config, assert) => {
                         ]
                     }
                     assert.equals(body, JSON.stringify(expected));
-                    console.log('case 4 passed');
+                    console.log('valid case 4 passed');
                 } catch (error) {
                     console.log(error.message);
                 }

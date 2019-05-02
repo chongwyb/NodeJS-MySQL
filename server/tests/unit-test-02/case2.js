@@ -52,10 +52,10 @@ module.exports = async (http, config, assert, utils) => {
                     try {
                         assert.equals(res.statusCode, cases[i].result.statusCode);
                         assert.equals(body, cases[i].result.body);
-                        console.log('case 2-' + (i + 1) + ' passed');
+                        console.log('invalid case 2-' + (i + 1) + ' passed');
                     } catch (error) {
                         console.log(error.message);
-                        console.log('case 2-' + (i + 1) + ' failed');
+                        console.log('invalid case 2-' + (i + 1) + ' failed');
                     }
                     resolve();
                 });

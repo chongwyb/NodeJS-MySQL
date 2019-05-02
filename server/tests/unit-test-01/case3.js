@@ -35,7 +35,7 @@ module.exports = async (http, config, assert) => {
                 // console.log('No more data in response.');
                 try {
                     assert.equals(res.statusCode, 204);
-                    console.log('case 3 passed');
+                    console.log('valid case 3 passed');
                 } catch (error) {
                     console.log(error.message);
                 }
