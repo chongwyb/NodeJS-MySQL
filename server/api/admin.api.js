@@ -28,67 +28,68 @@ var register = (req, res, con) => {
         var students = body.students;
 
         // Check for invalid parameters
+        var check = true;
         if (!teacher || !students || !students.length) {
+            check = false;
+        } else {
+            check = check && defaultEmailRegex.test(teacher);
+            for (var i = 0; i < students.length; i++) {
+                check = check && defaultEmailRegex.test(students[i]);
+            }
+        }
+
+        if (!check) {
             utils.resError(res, 400, 'Invalid parameters');
         } else {
-            var check = true;
-            check = defaultEmailRegex.test(teacher);
+            // Define SQL queries
+            let validateQuery1 = "SELECT * FROM teachers WHERE email = '" + teacher + "'";
+
+            let validateQuery2 = "SELECT * FROM students WHERE email IN(";
             for (var i = 0; i < students.length; i++) {
-                check = defaultEmailRegex.test(students[i]);
+                validateQuery2 += "'" + students[i] + "',";
             }
-            if (!check) {
-                utils.resError(res, 400, 'Invalid parameters');
-            }
-        }
+            validateQuery2 = validateQuery2.substring(0, validateQuery2.length - 1) + ")";
 
-        // Define SQL queries
-        let validateQuery1 = "SELECT * FROM teachers WHERE email = '" + teacher + "'";
-
-        let validateQuery2 = "SELECT * FROM students WHERE email IN(";
-        for (var i = 0; i < students.length; i++) {
-            validateQuery2 += "'" + students[i] + "',";
-        }
-        validateQuery2 = validateQuery2.substring(0, validateQuery2.length - 1) + ")";
-
-        let actualQuery = "INSERT INTO relationship(teacher_email, student_email) VALUES ";
-        for (var i = 0; i < students.length; i++) {
-            actualQuery += "('" + teacher + "','" + students[i] + "')";
-            if (i != students.length - 1) {
-                actualQuery += ",";
-            }
-        };
-
-        // Validate data in database before executing actual query
-        con.query(validateQuery1, function (err, result) {
-            if (err) {
-                utils.resError(res, 502, "database query error");
-            } else {
-                if (result.length == 1) {
-                    con.query(validateQuery2, function (err, result) {
-                        if (err) {
-                            utils.resError(res, 502, "database query error");
-                        } else {
-                            if (result.length == students.length) {
-                                con.query(actualQuery, function (err, result) {
-                                    if (err) {
-                                        // console.log(err);
-                                        utils.resError(res, 502, "database query error");
-                                    } else {
-                                        // console.log(result);
-                                        res.statusCode = 204;
-                                        res.end();
-                                    };
-                                });
-                            } else {
-                                utils.resError(res, 412, "error registering students");
-                            }
-                        }
-                    })
-                } else {
-                    utils.resError(res, 412, "error registering students");
+            let actualQuery = "INSERT INTO relationship(teacher_email, student_email) VALUES ";
+            for (var i = 0; i < students.length; i++) {
+                actualQuery += "('" + teacher + "','" + students[i] + "')";
+                if (i != students.length - 1) {
+                    actualQuery += ",";
                 }
             };
-        });
+
+            // Validate data in database before executing actual query
+            con.query(validateQuery1, function (err, result) {
+                if (err) {
+                    utils.resError(res, 502, "database query error");
+                } else {
+                    if (result.length == 1) {
+                        con.query(validateQuery2, function (err, result) {
+                            if (err) {
+                                utils.resError(res, 502, "database query error");
+                            } else {
+                                if (result.length == students.length) {
+                                    con.query(actualQuery, function (err, result) {
+                                        if (err) {
+                                            // console.log(err);
+                                            utils.resError(res, 502, "database query error");
+                                        } else {
+                                            // console.log(result);
+                                            res.statusCode = 204;
+                                            res.end();
+                                        };
+                                    });
+                                } else {
+                                    utils.resError(res, 412, "error registering students");
+                                }
+                            }
+                        })
+                    } else {
+                        utils.resError(res, 412, "error registering students");
+                    }
+                };
+            });
+        }
 
     });
 }
@@ -107,66 +108,72 @@ var commonstudents = (req, res, con) => {
 
     var parts = url.parse(req.url, true);
     var teachers = parts.query.teacher;
-    var distinct = [...new Set(teachers)];
+    var distinct = [];
+    if(typeof teachers == "string"){
+        distinct.push(teachers);
+    }else{
+        distinct = [...new Set(teachers)];
+    }
 
     // Check for invalid parameters
+    var check = true;
     if (!teachers || !teachers.length) {
+        check = false;
+    } else {
+        for (var i = 0; i < distinct.length; i++) {
+            check = check && defaultEmailRegex.test(distinct[i]);
+        }
+    }
+
+    if (!check) {
         utils.resError(res, 400, 'Invalid parameters');
     } else {
-        var check = true;
+        // Define SQL queries
+        let validateQuery1 = "SELECT * FROM teachers WHERE email IN(";
         for (var i = 0; i < distinct.length; i++) {
-            check = defaultEmailRegex.test(distinct[i]);
+            validateQuery1 += "'" + distinct[i] + "',";
         }
-        if (!check) {
-            utils.resError(res, 400, 'Invalid parameters');
-        }
-    }
+        validateQuery1 = validateQuery1.substring(0, validateQuery1.length - 1) + ")";
 
-    // Define SQL queries
-    let validateQuery1 = "SELECT * FROM teachers WHERE email IN(";
-    for (var i = 0; i < distinct.length; i++) {
-        validateQuery1 += "'" + distinct[i] + "',";
-    }
-    validateQuery1 = validateQuery1.substring(0, validateQuery1.length - 1) + ")";
-
-    let actualQuery = "SELECT count(*) as c, student_email FROM relationship WHERE ";
-    for (var i = 0; i < distinct.length; i++) {
-        if (i > 0) {
-            actualQuery += " OR teacher_email = '" + distinct[i] + "'";
-        } else {
-            actualQuery += "teacher_email = '" + distinct[i] + "'";
-        }
-    };
-    actualQuery += 'GROUP BY student_email HAVING c = ' + distinct.length;
-
-    // Validate data in database before executing actual query
-    con.query(validateQuery1, function (err, result) {
-        if (err) {
-            utils.resError(res, 502, "database query error");
-        } else {
-            if (result.length == distinct.length) {
-                con.query(actualQuery, function (err, result) {
-                    if (err) {
-                        // console.log(err);
-                        utils.resError(res, 412, "error retrieving common students");
-                    } else {
-                        // console.log(result);
-                        var students = [];
-                        if (result.length > 0) {
-                            for (var i = 0; i < result.length; i++) {
-                                students.push(result[i].student_email)
-                            }
-                        }
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.end(JSON.stringify({ "students": students }));
-                    };
-                });
+        let actualQuery = "SELECT count(*) as c, student_email FROM relationship WHERE ";
+        for (var i = 0; i < distinct.length; i++) {
+            if (i > 0) {
+                actualQuery += " OR teacher_email = '" + distinct[i] + "'";
             } else {
-                utils.resError(res, 412, "error retrieving common students");
+                actualQuery += "teacher_email = '" + distinct[i] + "'";
             }
-        }
-    });
+        };
+        actualQuery += 'GROUP BY student_email HAVING c = ' + distinct.length;
+
+        // Validate data in database before executing actual query
+        con.query(validateQuery1, function (err, result) {
+            if (err) {
+                utils.resError(res, 502, "database query error");
+            } else {
+                if (result.length == distinct.length) {
+                    con.query(actualQuery, function (err, result) {
+                        if (err) {
+                            // console.log(err);
+                            utils.resError(res, 412, "error retrieving common students");
+                        } else {
+                            // console.log(result);
+                            var students = [];
+                            if (result.length > 0) {
+                                for (var i = 0; i < result.length; i++) {
+                                    students.push(result[i].student_email)
+                                }
+                            }
+                            res.statusCode = 200;
+                            res.setHeader('Content-Type', 'application/json');
+                            res.end(JSON.stringify({ "students": students }));
+                        };
+                    });
+                } else {
+                    utils.resError(res, 412, "error retrieving common students");
+                }
+            }
+        });
+    }
 }
 
 /**
@@ -189,42 +196,43 @@ var suspend = (req, res, con) => {
         var student = body.student;
 
         // Check for invalid parameters
+        var check = true;
         if (!student) {
-            utils.resError(res, 400, 'Invalid parameters');
+            check = false;
         } else {
-            var check = true;
-            check = defaultEmailRegex.test(student);
-            if (!check) {
-                utils.resError(res, 400, 'Invalid parameters');
-            }
+            check = check && defaultEmailRegex.test(student);
         }
 
-        // Define SQL queries
-        let validateQuery1 = "SELECT * FROM students WHERE email = '" + student + "'";
+        if (!check) {
+            utils.resError(res, 400, 'Invalid parameters');
+        } else {
+            // Define SQL queries
+            let validateQuery1 = "SELECT * FROM students WHERE email = '" + student + "'";
 
-        var actualQuery = "UPDATE students SET suspended = 1 WHERE email = '" + student + "'";
+            var actualQuery = "UPDATE students SET suspended = 1 WHERE email = '" + student + "'";
 
-        // Validate data in database before executing actual query
-        con.query(validateQuery1, function (err, result) {
-            if (err) {
-                utils.resError(res, 502, "database query error");
-            } else {
-                if (result.length == 1) {
-                    con.query(actualQuery, function (err, result) {
-                        if (err) {
-                            // console.log(err);
-                            utils.resError(res, 502, "database query error");
-                        } else {
-                            // console.log(result);
-                            res.statusCode = 204;
-                            res.end();
-                        };
-                    });
+            // Validate data in database before executing actual query
+            con.query(validateQuery1, function (err, result) {
+                if (err) {
+                    utils.resError(res, 502, "database query error");
                 } else {
-                    utils.resError(res, 412, "error suspending students");
+                    if (result.length == 1) {
+                        con.query(actualQuery, function (err, result) {
+                            if (err) {
+                                // console.log(err);
+                                utils.resError(res, 502, "database query error");
+                            } else {
+                                // console.log(result);
+                                res.statusCode = 204;
+                                res.end();
+                            };
+                        });
+                    } else {
+                        utils.resError(res, 412, "error suspending students");
+                    }
                 }
-            }
-        });
+            });
+        }
     });
 }
 
@@ -253,63 +261,64 @@ var retrievefornotifications = (req, res, con) => {
         var notification = body.notification;
 
         // Check for invalid parameters
-        if (!teacher) {
-            utils.resError(res, 400, 'Invalid parameters');
+        var check = true;
+        if (!teacher || !notification) {
+            check = false;
         } else {
-            var check = true;
-            check = defaultEmailRegex.test(teacher);
-            if (!check) {
-                utils.resError(res, 400, 'Invalid parameters');
-            }
+            check = check && defaultEmailRegex.test(teacher);
         }
 
-        // Define SQL queries
-        let validateQuery1 = "SELECT * FROM teachers WHERE email = '" + teacher + "'";
+        if (!check) {
+            utils.resError(res, 400, 'Invalid parameters');
+        } else {
+            // Define SQL queries
+            let validateQuery1 = "SELECT * FROM teachers WHERE email = '" + teacher + "'";
 
-        var parts = notification.split(' ');
-        var sievedEmails = [];
-        for (var i = 0; i < parts.length; i++) {
-            if ((specialEmailRegex).test(parts[i])) {
-                sievedEmails.push(parts[i].substring(1));
-            };
-        };
-
-        var actualQuery = "SELECT DISTINCT s.email AS 'student_email' FROM teachers t, relationship r , students s\
-        WHERE (r.teacher_email = t.email AND r.student_email = s.email AND s.suspended = 0 AND r.teacher_email = '"+ teacher + "')";
-        if (sievedEmails.length > 0) {
-            actualQuery += "OR (r.student_email IN(";
-            for (var i = 0; i < sievedEmails.length; i++) {
-                actualQuery += "'" + sievedEmails[i] + "',";
-            }
-            actualQuery = actualQuery.substring(0, actualQuery.length - 1) + ") AND s.suspended = 0)";
-        };
-
-        // Validate data in database before executing actual query
-        con.query(validateQuery1, function (err, result) {
-            if (err) {
-                utils.resError(res, 502, "database query error");
-            } else {
-                if (result.length == 1) {
-                    con.query(actualQuery, function (err, result) {
-                        if (err) {
-                            // console.log(err);
-                            utils.resError(res, 502, "database query error");
-                        } else {
-                            // console.log(result);
-                            var recipients = [];
-                            for (var i = 0; i < result.length; i++) {
-                                recipients.push(result[i].student_email);
-                            }
-                            res.statusCode = 200;
-                            res.setHeader('Content-Type', 'application/json');
-                            res.end(JSON.stringify({ "recipients": recipients }));
-                        };
-                    });
-                } else {
-                    utils.resError(res, 412, "error retrieving students eligible for notifications");
+            var parts = notification.split(' ');
+            var sievedEmails = [];
+            for (var i = 0; i < parts.length; i++) {
+                if ((specialEmailRegex).test(parts[i])) {
+                    sievedEmails.push(parts[i].substring(1));
                 };
             };
-        });
+
+            var actualQuery = "SELECT DISTINCT s.email AS 'student_email' FROM teachers t, relationship r , students s\
+            WHERE (r.teacher_email = t.email AND r.student_email = s.email AND s.suspended = 0 AND r.teacher_email = '"+ teacher + "')";
+            if (sievedEmails.length > 0) {
+                actualQuery += "OR (r.student_email IN(";
+                for (var i = 0; i < sievedEmails.length; i++) {
+                    actualQuery += "'" + sievedEmails[i] + "',";
+                }
+                actualQuery = actualQuery.substring(0, actualQuery.length - 1) + ") AND s.suspended = 0)";
+            };
+
+            // Validate data in database before executing actual query
+            con.query(validateQuery1, function (err, result) {
+                if (err) {
+                    utils.resError(res, 502, "database query error");
+                } else {
+                    if (result.length == 1) {
+                        con.query(actualQuery, function (err, result) {
+                            if (err) {
+                                // console.log(err);
+                                utils.resError(res, 502, "database query error");
+                            } else {
+                                // console.log(result);
+                                var recipients = [];
+                                for (var i = 0; i < result.length; i++) {
+                                    recipients.push(result[i].student_email);
+                                }
+                                res.statusCode = 200;
+                                res.setHeader('Content-Type', 'application/json');
+                                res.end(JSON.stringify({ "recipients": recipients }));
+                            };
+                        });
+                    } else {
+                        utils.resError(res, 412, "error retrieving students eligible for notifications");
+                    };
+                };
+            });
+        }
     });
 }
 

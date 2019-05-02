@@ -29,7 +29,7 @@ module.exports = async (http, config, assert) => {
 
             res.setEncoding('utf8');
             res.on('data', (chunk) => {
-                console.log(`BODY: ${chunk}`);
+                // console.log(`BODY: ${chunk}`);
             });
             res.on('end', () => {
                 // console.log('No more data in response.');
