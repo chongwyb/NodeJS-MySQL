@@ -52,11 +52,9 @@ var register = (req, res, con) => {
 
             let actualQuery = "INSERT INTO relationship(teacher_email, student_email) VALUES ";
             for (var i = 0; i < students.length; i++) {
-                actualQuery += "('" + teacher + "','" + students[i] + "')";
-                if (i != students.length - 1) {
-                    actualQuery += ",";
-                }
+                actualQuery += "('" + teacher + "','" + students[i] + "'),";
             };
+            actualQuery = actualQuery.substring(0, actualQuery.length - 1);
 
             // Validate data in database before executing actual query
             con.query(validateQuery1, function (err, result) {
