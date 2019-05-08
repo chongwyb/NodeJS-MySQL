@@ -1,4 +1,4 @@
-var response = (res, code, msg) => {
+let resError = (res, code, msg) => {
     if(msg){
         res.status(code).json({ "message": msg });
     }else{
@@ -6,6 +6,15 @@ var response = (res, code, msg) => {
     }
 }
 
+let resValid = (res, code, data) => {
+    if(data){
+        res.status(code).json(data);
+    }else{
+        res.sendStatus(code);
+    }
+}
+
 module.exports = {
-    response: response,
+    resError: resError,
+    resValid: resValid,
 }

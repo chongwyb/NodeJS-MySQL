@@ -48,7 +48,7 @@ sequelize
         }
         // Initialise test
         if(config.TEST){
-            // require('./test/main')();
+            // await require('./test/main')();
         }
     });
 
@@ -57,4 +57,5 @@ module.exports = {
     Students: Students,
     Relationship: Relationship,
     sequelize: sequelize,
+    Op: Sequelize.Op,
 }
