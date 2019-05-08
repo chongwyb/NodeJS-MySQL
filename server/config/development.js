@@ -12,6 +12,7 @@ module.exports = {
   MYSQL_PORT: 3306,
   MYSQL_LOGGING: console.log,
 
+  INIT: false,
   SEED: false,
   TEST: false,
 

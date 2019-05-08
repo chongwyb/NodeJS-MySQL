@@ -1,45 +1,22 @@
-const http = require('http');
-const mysql = require('mysql');
+const express = require('express');
+const bodyParser = require("body-parser");
 
-const routes = require('./routes');
 const config = require('./config');
-const database = require('./database');
-const seed = require('./seed');
-const test = require('./tests/main');
-
 const hostname = config.HOSTNAME;
 const port = config.PORT || 3000;
 
-const con = mysql.createConnection({
-  host: config.MYSQL_HOSTNAME,
-  user: config.MYSQL_USERNAME,
-  password: config.MYSQL_PASSWORD,
-  database: config.MYSQL_DATABASE,
-});
+const database = require('./database');
 
-con.connect(async (err) => {
-  if (err) throw err;
-  console.log(`Connected to MYSQL:${config.MYSQL_HOSTNAME}`);
-  await database(con);
+const app = express();
+app.use(bodyParser.json());
 
-  if(config.SEED){
-    await seed(con);
-  }
+const routes = require('./routes')(app, database);
 
-  if(config.TEST){
-    await test();
-  }
-});
+// Error handler
+// app.use((err, req, res, next) => {
+//   res.status(500).json({ "message": "Internal Server Error" });
+// });
 
-const server = http.createServer((req, res) => {
-
-  // Check if request is an api call
-  if ((/^\/api/).test(req.url)) {
-    routes(req, res, con);
-  }
-
-});
-
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+app.listen(port, hostname, 511, () => {
+  console.log(`Server running at http://${hostname}:${port}`);
 });

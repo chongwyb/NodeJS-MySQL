@@ -1,25 +1,13 @@
-const url = require('url');
-const AdminApi = require('./api/admin.api');
+// Handle API routes
+module.exports = (app, database) => {
 
-const map = {
-    'POST/api/register': AdminApi.register,
-    'GET/api/commonstudents': AdminApi.commonstudents,
-    'POST/api/suspend': AdminApi.suspend,
-    'POST/api/retrievefornotifications': AdminApi.retrievefornotifications,
-}
+    // Import API methods
+    const Admin = require('./api/admin.api')(database);
 
-module.exports = (req, res, con) => {
-
-    // Parse the api routes here
-    const request = req.method + url.parse(req.url).pathname;
-    // Pass the req, res, mysql to the selected route
-    const route = map[request];
-    if(route){
-        route(req, res, con);
-    }else{
-        res.statusCode = 404;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({"message": "api method not found"}))
-    }
-
+    // Define API routes
+    app.post('/api/register', Admin.register);
+    app.get('/api/commonstudents', Admin.commonstudents);
+    app.post('/api/suspend', Admin.suspend);
+    app.post('/api/retrievefornotifications', Admin.retrievefornotifications);
+    
 }

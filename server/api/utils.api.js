@@ -1,9 +1,11 @@
-var resError = (res, code, msg) => {
-    res.statusCode = code;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ "message": msg }));
+var response = (res, code, msg) => {
+    if(msg){
+        res.status(code).json({ "message": msg });
+    }else{
+        res.sendStatus(code);
+    }
 }
 
 module.exports = {
-    resError: resError,
+    response: response,
 }

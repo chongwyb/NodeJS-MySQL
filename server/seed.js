@@ -1,3 +1,8 @@
+const db = require('./database');
+const Teachers = db.Teachers;
+const Students = db.Students;
+const Relationship = db.Relationship;
+
 /**
  * Initial database seed
  * 
@@ -21,43 +26,30 @@
  * teacherB@example.com | studentC@example.com
  */
 
-module.exports = async (con) => {
+module.exports = async () => {
+    await Teachers.bulkCreate([
+        { email: 'teacherA@example.com' },
+        { email: 'teacherB@example.com' },
+        { email: 'teacherC@example.com' },
+    ]).catch(function(error){
+        console.log(error);
+    })
 
-    await new Promise((resolve) => {
-        con.query("INSERT INTO teachers (email) VALUES\
-        ('teacherA@example.com'),\
-        ('teacherB@example.com'),\
-        ('teacherC@example.com')",
-            function (err, result) {
-                if (err) throw err;
-                console.log(`INSERTED ${result.affectedRows} RECORDS : teacher`);
-                resolve();
-            });
-    });
+    await Students.bulkCreate([
+        { email: 'studentA@example.com' },
+        { email: 'studentB@example.com' },
+        { email: 'studentC@example.com' },
+    ]).catch(function(error){
+        console.log(error);
+    })
 
-    await new Promise((resolve) => {
-        con.query("INSERT INTO students (email, suspended) VALUES\
-        ('studentA@example.com', false),\
-        ('studentB@example.com', false),\
-        ('studentC@example.com', false)",
-            function (err, result) {
-                if (err) throw err;
-                console.log(`INSERTED ${result.affectedRows} RECORDS : students`);
-                resolve();
-            });
-    });
-
-    await new Promise((resolve) => {
-        con.query("INSERT INTO relationship (teacher_email, student_email) VALUES\
-        ('teacherA@example.com','studentA@example.com'),\
-        ('teacherB@example.com','studentB@example.com'),\
-        ('teacherA@example.com','studentC@example.com'),\
-        ('teacherB@example.com','studentC@example.com')",
-            function (err, result) {
-                if (err) throw err;
-                console.log(`INSERTED ${result.affectedRows} RECORDS : relationship`);
-                resolve();
-            });
-    });
+    await Relationship.bulkCreate([
+        { teacher_id: 1, student_id: 1},
+        { teacher_id: 1, student_id: 3},
+        { teacher_id: 2, student_id: 2},
+        { teacher_id: 2, student_id: 3},
+    ]).catch(function(error){
+        console.log(error);
+    })
 
 }
