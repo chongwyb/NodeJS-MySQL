@@ -1,5 +1,4 @@
 const utils = require('./utils.api');
-const url = require('url');
 
 // const simpleEmailRegex = /^@.+@.+\..+/mi;
 const defaultEmailRegex = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/mi;
@@ -10,7 +9,9 @@ const specialEmailRegex = /^@(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*
  * Register a unique composite key of (teacher_id, student_id)
  * 
  * CONDITION:
- * teacher and students email must exist in the database
+ * teacher email must exist in the database
+ * student emails must exist in the database
+ * student emails must be distinct
  */
 const register = (db) => {
     return async (req, res) => {
@@ -52,21 +53,27 @@ const register = (db) => {
         });
 
         let dataset1 = "", dataset2 = "";
-        await Promise
+        let p_value = await Promise
             .all([validate_teacher, validate_students])
             .then((response) => {
                 if (response[0] == null) {
-                    return utils.resError(res, 500, 'Teacher is not registered');
+                    utils.resError(res, 500, 'Teacher is not registered');
+                    return false;
                 };
                 if (response[1].length != student_emails.length) {
-                    return utils.resError(res, 500, 'One or more of the students are not registered');
+                    utils.resError(res, 500, 'One or more of the students are not registered');
+                    return false;
                 };
                 dataset1 = response[0];
                 dataset2 = response[1];
+                return true;
             })
             .catch((error) => {
-                return utils.resError(res, 502, "validation logic error");
+                utils.resError(res, 502, "validation logic error");
+                return false;
             })
+
+        if (!p_value) { return; };
 
         // Actual SQL query
         let new_data = [];
@@ -82,10 +89,10 @@ const register = (db) => {
                 return utils.resValid(res, 204, null);
             })
             .catch(error => {
-                if (error.original.errno == 1062) {
+                if (error.original && error.original.errno == 1062) {
                     return utils.resError(res, 500, "A teacher student pair is already registered");
                 }
-                return utils.resError(res, 502, "execution logic error");
+                return utils.resError(res, 502, "error registering students");
             })
     }
 }
@@ -134,25 +141,30 @@ const commonstudents = (db) => {
         })
 
         let dataset1 = "";
-        await Promise
+        let p_value = await Promise
             .all([validate_teachers])
             .then((response) => {
                 if (response[0].length != distinct_emails.length) {
-                    return utils.resError(res, 500, 'One or more of the teachers are not registered');
+                    utils.resError(res, 500, 'One or more of the teachers are not registered');
+                    return false;
                 };
                 dataset1 = response[0];
+                return true;
             })
             .catch((error) => {
                 // console.log(error)
-                return utils.resError(res, 502, "validation logic error");
+                utils.resError(res, 502, "validation logic error");
+                return false;
             })
 
+        if (!p_value) { return; };
+
+        // Actual SQL query
         let teacher_indexes = [];
         for (let i = 0; i < dataset1.length; i++) {
             teacher_indexes.push(dataset1[i].id);
         };
 
-        // Actual SQL query
         db.Relationship
             .findAll({
                 attributes: [
@@ -188,67 +200,84 @@ const commonstudents = (db) => {
             })
             .catch(error => {
                 // console.log(error)
-                return utils.resError(res, 502, "execution logic error");
+                return utils.resError(res, 502, "error retrieving common students");
             })
     }
 }
 
 /**
- * Description:
+ * USAGE:
  * Set a specified student's suspended = TRUE
+ * 
+ * CONDITION:
+ * student email must exist in database
  */
 var suspend = (db) => {
-    return (req, res) => {
+    return async (req, res) => {
         console.log('POST/api/suspend');
 
-        let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString(); // convert Buffer to string
+        // Check for invalid parameters
+        const body = req.body;
+
+        const student_email = body.student;
+
+        let check = true;
+        if (!student_email) {
+            check = false;
+        } else {
+            check = check && defaultEmailRegex.test(student_email);
+        }
+
+        if (!check) {
+            return utils.resError(res, 400, 'Invalid parameters');
+        }
+
+        // Validation SQL queries
+        const validate_student = db.Students.findOne({
+            where: {
+                email: student_email
+            },
+            raw: true,
         });
-        req.on('end', () => {
-            body = JSON.parse(body);
 
-            var student = body.student;
+        let dataset1 = "";
+        let p_value = await Promise
+            .all([validate_student])
+            .then((response) => {
+                if (response[0] == null) {
+                    utils.resError(res, 500, 'Student is not registered');
+                    return false;
+                }
+                dataset1 = response[0];
+                return true;
+            })
+            .catch((error) => {
+                // console.log(error);
+                utils.resError(res, 502, "validation logic error");
+                return false;
+            });
 
-            // Check for invalid parameters
-            var check = true;
-            if (!student) {
-                check = false;
-            } else {
-                check = check && defaultEmailRegex.test(student);
-            }
+        if (!p_value) { return; };
 
-            if (!check) {
-                utils.resError(res, 400, 'Invalid parameters');
-            } else {
-                // Define SQL queries
-                let validateQuery1 = "SELECT * FROM students WHERE email = '" + student + "'";
-
-                var actualQuery = "UPDATE students SET suspended = 1 WHERE email = '" + student + "'";
-
-                // Validate data in database before executing actual query
-                con.query(validateQuery1, function (err, result) {
-                    if (err) {
-                        utils.resError(res, 502, "database query error");
-                    } else {
-                        if (result.length == 1) {
-                            con.query(actualQuery, function (err, result) {
-                                if (err) {
-                                    // console.log(err);
-                                    utils.resError(res, 502, "database query error");
-                                } else {
-                                    // console.log(result);
-                                    res.statusCode = 204;
-                                    res.end();
-                                };
-                            });
-                        } else {
-                            utils.resError(res, 412, "error suspending students");
-                        }
+        // Actual SQL query
+        db.Students
+            .update({
+                suspended: true,
+            }, {
+                    where: {
+                        email: student_email,
                     }
-                });
-            }
-        });
+                })
+            .then((response) => {
+                if (response[0] == 0) {
+                    return utils.resError(res, 500, "Student is already suspended");
+                }
+                return utils.resValid(res, 204, null);
+            })
+            .catch((error) => {
+                // console.log(error);
+                return utils.resError(res, 502, "error suspending student");
+            })
     }
 }
 
