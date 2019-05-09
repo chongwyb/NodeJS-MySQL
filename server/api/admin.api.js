@@ -329,6 +329,7 @@ var retrievefornotifications = (db) => {
                 sieved_emails.push(parts[i].substring(1));
             };
         };
+        sieved_emails = [...new Set(sieved_emails)];
 
         const validate_teacher = db.Teachers.findOne({
             attributes: [
@@ -406,6 +407,9 @@ var retrievefornotifications = (db) => {
                         }
                     ]
                 },
+                order: [
+                    [db.sequelize.col('student.email'),'ASC']
+                ],
                 raw: true,
             })
             .then((response) => {
@@ -416,7 +420,7 @@ var retrievefornotifications = (db) => {
                 return utils.resValid(res, 200, { recipients: recipients });
             })
             .catch((error) => {
-                // console.log(error);
+                console.log(error);
                 return utils.resError(res, 502, "error retrieving students eligible for notifications");
             })
     }
