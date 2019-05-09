@@ -1,5 +1,6 @@
 module.exports = [
     // Invalid case 2-1
+    // Empty query
     {
         query: "",
         result: {
@@ -8,6 +9,7 @@ module.exports = [
         }
     },
     // Invalid case 2-2
+    // Empty teacher email
     {
         query: "?teacher=",
         result: {
@@ -16,6 +18,7 @@ module.exports = [
         }
     },
     // Invalid case 2-3
+    // Invalid teacher email
     {
         query: "?teacher=abcdefg",
         result: {
@@ -24,6 +27,7 @@ module.exports = [
         }
     },
     // Invalid case 2-4
+    // No database record of teacher
     {
         query: "?teacher=teacherD%40example.com",
         result: {

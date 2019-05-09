@@ -1,5 +1,6 @@
 module.exports = [
     // Invalid case 4-1
+    // Empty body
     {
         data: {},
         result: {
@@ -8,6 +9,7 @@ module.exports = [
         }
     },
     // Invalid case 4-2
+    // Empty teacher email
     {
         data: {
             "teacher": "",
@@ -19,6 +21,7 @@ module.exports = [
         }
     },
     // Invalid case 4-3
+    // Empty notification
     {
         data: {
             "teacher": "teacherA@example.com",
@@ -30,6 +33,7 @@ module.exports = [
         }
     },
     // Invalid case 4-4
+    // Invalid teacher email
     {
         data: {
             "teacher": "abcdefg",
@@ -41,6 +45,7 @@ module.exports = [
         }
     },
     // Invalid case 4-5
+    // No database record of teacher
     {
         data: {
             "teacher": "teacherD@example.com",
@@ -52,6 +57,7 @@ module.exports = [
         }
     },
     // Invalid case 4-6
+    // No database record of student
     {
         data: {
             "teacher": "teacherA@example.com",

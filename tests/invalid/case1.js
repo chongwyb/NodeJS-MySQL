@@ -1,5 +1,6 @@
 module.exports = [
     // Invalid case 1-1
+    // Empty body
     {
         data: {},
         result: {
@@ -8,6 +9,7 @@ module.exports = [
         }
     },
     // Invalid case 1-2
+    // Empty teacher email
     {
         data: {
             "teacher": "",
@@ -19,6 +21,7 @@ module.exports = [
         }
     },
     // Invalid case 1-3
+    // Empty student email
     {
         data: {
             "teacher": "teacherC@example.com",
@@ -30,17 +33,7 @@ module.exports = [
         }
     },
     // Invalid case 1-4
-    {
-        data: {
-            "teacher": "teacherD@example.com",
-            "students": ["abcdefg"]
-        },
-        result: {
-            statusCode: 400,
-            body: { "message": "Invalid parameters" }
-        }
-    },
-    // Invalid case 1-5
+    // Invalid teacher email
     {
         data: {
             "teacher": "abcdefg",
@@ -51,7 +44,20 @@ module.exports = [
             body: { "message": "Invalid parameters" }
         }
     },
+    // Invalid case 1-5
+    // Invalid student email
+    {
+        data: {
+            "teacher": "teacherC@example.com",
+            "students": ["abcdefg"]
+        },
+        result: {
+            statusCode: 400,
+            body: { "message": "Invalid parameters" }
+        }
+    },
     // Invalid case 1-6
+    // No database record of teacher
     {
         data: {
             "teacher": "teacherD@example.com",
@@ -63,6 +69,7 @@ module.exports = [
         }
     },
     // Invalid case 1-7
+    // No database record of student
     {
         data: {
             "teacher": "teacherC@example.com",
