@@ -46,10 +46,6 @@ sequelize
         if(config.SEED){
             await require('./seed')();
         }
-        // Initialise test
-        if(config.TEST){
-            await require('./tests')();
-        }
     });
 
 module.exports = {

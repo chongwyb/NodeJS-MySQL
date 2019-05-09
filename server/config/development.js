@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  domain_name: "http://localhost:3000",
+  domain_name: "http://127.0.0.1:3000",
   HOSTNAME: '127.0.0.1',
   PORT: 3000,
 
@@ -14,7 +14,6 @@ module.exports = {
 
   INIT: false,
   SEED: false,
-  TEST: false,
 
   version: '1.0.0'
 };

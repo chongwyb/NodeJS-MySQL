@@ -39,13 +39,6 @@ To create pseudo table records.
   SEED: true,
 ```
 
-### Unit tests
-To enable unit tests.
-```javascript
-  TEST: true,
-```
-For more information on generating additional test cases, click [here](./instructions/UNIT_TEST.md).
-
 ## Launching the application
 Install the necessary NPM packages
 ```
@@ -56,3 +49,13 @@ Start the application
 ```
 $ npm run start:dev
 ```
+
+### Unit tests
+Ensure that the SEED has been loaded before running the unit tests.
+
+To execute unit tests.
+```
+$ npm test
+```
+
+For more information on generating additional test cases, click [here](./instructions/UNIT_TEST.md).

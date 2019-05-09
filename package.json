@@ -5,7 +5,7 @@
   "main": "server/app.js",
   "scripts": {
     "start:dev": "node server/app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha tests/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +14,11 @@
     "express": "^4.16.4",
     "mysql": "^2.17.1",
     "mysql2": "^1.6.5",
+    "request": "^2.88.0",
     "sequelize": "^5.8.5"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4"
   }
 }
