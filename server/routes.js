@@ -2,7 +2,7 @@
 module.exports = (app, database) => {
 
     // Import API methods
-    const Admin = require('./api/admin.api')(database);
+    const Admin = require('./api/admin')(database);
 
     // Define API routes
     app.post('/api/register', Admin.register);
