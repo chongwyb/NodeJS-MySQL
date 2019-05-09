@@ -48,7 +48,7 @@ sequelize
         }
         // Initialise test
         if(config.TEST){
-            await require('./tests/main')();
+            await require('./tests')();
         }
     });
 
