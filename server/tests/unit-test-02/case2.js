@@ -5,6 +5,7 @@ module.exports = async (http, config, assert, utils) => {
     const method = 'GET';
 
     let cases = [
+        // invalid case 2-1
         {
             query: "",
             result: {
@@ -12,6 +13,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 2-2
         {
             query: "?teacher=",
             result: {
@@ -19,6 +21,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 2-3
         {
             query: "?teacher=abcdefg",
             result: {
@@ -26,11 +29,12 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 2-4
         {
             query: "?teacher=teacherD%40example.com",
             result: {
-                statusCode: 412,
-                body: JSON.stringify({ "message": "error retrieving common students" })
+                statusCode: 500,
+                body: JSON.stringify({ "message": "One or more of the teachers are not registered" })
             }
         },
     ]

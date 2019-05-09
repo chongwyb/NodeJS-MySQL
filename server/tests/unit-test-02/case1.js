@@ -5,6 +5,7 @@ module.exports = async (http, config, assert, utils) => {
     const method = 'POST';
 
     let cases = [
+        // invalid case 1-1
         {
             data: JSON.stringify({}),
             result: {
@@ -12,6 +13,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 1-2
         {
             data: JSON.stringify({
                 "teacher": "",
@@ -22,6 +24,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 1-3
         {
             data: JSON.stringify({
                 "teacher": "teacherC@example.com",
@@ -32,6 +35,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 1-4
         {
             data: JSON.stringify({
                 "teacher": "teacherD@example.com",
@@ -42,6 +46,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 1-5
         {
             data: JSON.stringify({
                 "teacher": "abcdefg",
@@ -52,24 +57,26 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 1-6
         {
             data: JSON.stringify({
                 "teacher": "teacherD@example.com",
                 "students": ["studentC@example.com"]
             }),
             result: {
-                statusCode: 412,
-                body: JSON.stringify({ "message": "error registering students" })
+                statusCode: 500,
+                body: JSON.stringify({ "message": "Teacher is not registered" })
             }
         },
+        // invalid case 1-7
         {
             data: JSON.stringify({
                 "teacher": "teacherC@example.com",
                 "students": ["studentD@example.com"]
             }),
             result: {
-                statusCode: 412,
-                body: JSON.stringify({ "message": "error registering students" })
+                statusCode: 500,
+                body: JSON.stringify({ "message": "One or more of the students are not registered" })
             }
         },
     ]

@@ -33,6 +33,7 @@ module.exports = async (http, config, assert) => {
                     console.log('valid case 2 passed');
                 } catch (error) {
                     console.log(error.message);
+                    console.log('valid case 2 failed');
                 }
                 resolve();
             });

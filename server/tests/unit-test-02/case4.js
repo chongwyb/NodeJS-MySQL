@@ -5,6 +5,7 @@ module.exports = async (http, config, assert, utils) => {
     const method = 'POST';
 
     let cases = [
+        // invalid case 4-1
         {
             data: JSON.stringify({}),
             result: {
@@ -12,6 +13,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 4-2
         {
             data: JSON.stringify({
                 "teacher": "",
@@ -22,6 +24,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 4-3
         {
             data: JSON.stringify({
                 "teacher": "teacherA@example.com",
@@ -32,6 +35,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 4-4
         {
             data: JSON.stringify({
                 "teacher": "abcdefg",
@@ -42,14 +46,26 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 4-5
         {
             data: JSON.stringify({
                 "teacher": "teacherD@example.com",
                 "notification": "Hello students! @studentA@example.com @studentB@example.com @studentC@example.com"
             }),
             result: {
-                statusCode: 412,
-                body: JSON.stringify({ "message": "error retrieving students eligible for notifications" })
+                statusCode: 500,
+                body: JSON.stringify({ "message": "Teacher is not registered" })
+            }
+        },
+        // invalid case 4-6
+        {
+            data: JSON.stringify({
+                "teacher": "teacherA@example.com",
+                "notification": "Hello students! @studentA@example.com @studentB@example.com @studentZ@example.com"
+            }),
+            result: {
+                statusCode: 500,
+                body: JSON.stringify({ "message": "One or more students are not registered" })
             }
         },
     ]

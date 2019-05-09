@@ -5,6 +5,7 @@ module.exports = async (http, config, assert, utils) => {
     const method = 'POST';
 
     let cases = [
+        // invalid case 3-1
         {
             data: JSON.stringify({}),
             result: {
@@ -12,6 +13,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 3-2
         {
             data: JSON.stringify({
                 "student": ""
@@ -21,6 +23,7 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 3-3
         {
             data: JSON.stringify({
                 "student": "abcdefg"
@@ -30,13 +33,14 @@ module.exports = async (http, config, assert, utils) => {
                 body: JSON.stringify({ "message": "Invalid parameters" })
             }
         },
+        // invalid case 3-4
         {
             data: JSON.stringify({
                 "student": "studentD@example.com"
             }),
             result: {
-                statusCode: 412,
-                body: JSON.stringify({ "message": "error suspending students" })
+                statusCode: 500,
+                body: JSON.stringify({ "message": "Student is not registered" })
             }
         },
     ]
