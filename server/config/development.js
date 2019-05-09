@@ -10,7 +10,7 @@ module.exports = {
   MYSQL_HOSTNAME: 'localhost',
   MYSQL_DATABASE: 'school',
   MYSQL_PORT: 3306,
-  MYSQL_LOGGING: console.log,
+  MYSQL_LOGGING: false,
 
   INIT: false,
   SEED: false,
