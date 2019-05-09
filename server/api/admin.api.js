@@ -39,6 +39,9 @@ const register = (db) => {
 
         // Validation SQL queries
         const validate_teacher = db.Teachers.findOne({
+            attributes: [
+                'id'
+            ],
             where: {
                 email: teacher_email
             },
@@ -46,6 +49,9 @@ const register = (db) => {
         });
 
         const validate_students = db.Students.findAll({
+            attributes: [
+                'id'
+            ],
             where: {
                 email: student_emails
             },
@@ -134,6 +140,9 @@ const commonstudents = (db) => {
 
         // Validation SQL queries
         const validate_teachers = db.Teachers.findAll({
+            attributes: [
+                'id'
+            ],
             where: {
                 email: distinct_emails
             },
@@ -290,79 +299,126 @@ var suspend = (db) => {
  * Teacher / Student exists in the respective database table
  */
 var retrievefornotifications = (db) => {
-    return (req, res) => {
+    return async (req, res) => {
         console.log('POST/api/retrievefornotifications');
 
-        let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString(); // convert Buffer to string
+        // Check for invalid parameters
+        const body = req.body;
+
+        const teacher_email = body.teacher;
+        const notification = body.notification;
+
+        // TODO sanitise notification
+
+        var check = true;
+        if (!teacher_email || !notification) {
+            check = false;
+        } else {
+            check = check && defaultEmailRegex.test(teacher_email);
+        }
+
+        if (!check) {
+            return utils.resError(res, 400, 'Invalid parameters');
+        }
+
+        // Validation SQL queries
+        let parts = notification.split(' ');
+        let sieved_emails = [];
+        for (var i = 0; i < parts.length; i++) {
+            if ((specialEmailRegex).test(parts[i])) {
+                sieved_emails.push(parts[i].substring(1));
+            };
+        };
+
+        const validate_teacher = db.Teachers.findOne({
+            attributes: [
+                'id'
+            ],
+            where: {
+                email: teacher_email,
+            },
+            raw: true,
         });
-        req.on('end', () => {
-            body = JSON.parse(body);
 
-            var teacher = body.teacher;
-            var notification = body.notification;
-
-            // Check for invalid parameters
-            var check = true;
-            if (!teacher || !notification) {
-                check = false;
-            } else {
-                check = check && defaultEmailRegex.test(teacher);
-            }
-
-            if (!check) {
-                utils.resError(res, 400, 'Invalid parameters');
-            } else {
-                // Define SQL queries
-                let validateQuery1 = "SELECT * FROM teachers WHERE email = '" + teacher + "'";
-
-                var parts = notification.split(' ');
-                var sievedEmails = [];
-                for (var i = 0; i < parts.length; i++) {
-                    if ((specialEmailRegex).test(parts[i])) {
-                        sievedEmails.push(parts[i].substring(1));
-                    };
-                };
-
-                var actualQuery = "SELECT DISTINCT s.email AS 'student_email' FROM teachers t, relationship r , students s\
-            WHERE (r.teacher_email = t.email AND r.student_email = s.email AND s.suspended = 0 AND r.teacher_email = '"+ teacher + "')";
-                if (sievedEmails.length > 0) {
-                    actualQuery += "OR (r.student_email IN(";
-                    for (var i = 0; i < sievedEmails.length; i++) {
-                        actualQuery += "'" + sievedEmails[i] + "',";
-                    }
-                    actualQuery = actualQuery.substring(0, actualQuery.length - 1) + ") AND s.suspended = 0)";
-                };
-
-                // Validate data in database before executing actual query
-                con.query(validateQuery1, function (err, result) {
-                    if (err) {
-                        utils.resError(res, 502, "database query error");
-                    } else {
-                        if (result.length == 1) {
-                            con.query(actualQuery, function (err, result) {
-                                if (err) {
-                                    // console.log(err);
-                                    utils.resError(res, 502, "database query error");
-                                } else {
-                                    // console.log(result);
-                                    var recipients = [];
-                                    for (var i = 0; i < result.length; i++) {
-                                        recipients.push(result[i].student_email);
-                                    }
-                                    res.statusCode = 200;
-                                    res.setHeader('Content-Type', 'application/json');
-                                    res.end(JSON.stringify({ "recipients": recipients }));
-                                };
-                            });
-                        } else {
-                            utils.resError(res, 412, "error retrieving students eligible for notifications");
-                        };
-                    };
-                });
-            }
+        const validate_students = db.Students.findAll({
+            attributes: [
+                'id'
+            ],
+            where: {
+                email: sieved_emails
+            },
+            raw: true,
         });
+
+        let dataset1 = "", dataset2 = "";
+        let p_value = await Promise
+            .all([validate_teacher, validate_students])
+            .then((response) => {
+                if (response[0] == null) {
+                    utils.resError(res, 500, 'Teacher is not registered');
+                    return false;
+                }
+                if (response[1].length != sieved_emails.length) {
+                    utils.resError(res, 500, 'One or more students are not registered');
+                    return false;
+                }
+                dataset1 = response[0];
+                dataset2 = response[1];
+                return true;
+            })
+            .catch((error) => {
+                // console.log(error);
+                utils.resError(res, 502, "validation logic error");
+                return false;
+            })
+
+        if (!p_value) { return; };
+
+        // Actual SQL query
+        let teacher_index = dataset1.id;
+        let student_indexes = [];
+        for (let i = 0; i < dataset2.length; i++) {
+            student_indexes.push(dataset2[i].id);
+        };
+
+        db.Relationship
+            .findAll({
+                attributes: [
+                    [db.sequelize.fn('DISTINCT', db.sequelize.col('student.email')), 'student_email']
+                ],
+                include: [{
+                    model: db.Teachers,
+                    required: true,
+                    attributes: [],
+                }, {
+                    model: db.Students,
+                    required: true,
+                    attributes: [],
+                }],
+                where: {
+                    [db.Op.and]: [
+                        { '$student.suspended$': false },
+                        {
+                            [db.Op.or]: [
+                                { 'teacher_id': teacher_index },
+                                { 'student_id': student_indexes }
+                            ]
+                        }
+                    ]
+                },
+                raw: true,
+            })
+            .then((response) => {
+                let recipients = [];
+                for (let i = 0; i < response.length; i++) {
+                    recipients.push(response[i].student_email);
+                }
+                return utils.resValid(res, 200, { recipients: recipients });
+            })
+            .catch((error) => {
+                // console.log(error);
+                return utils.resError(res, 502, "error retrieving students eligible for notifications");
+            })
     }
 }
 
