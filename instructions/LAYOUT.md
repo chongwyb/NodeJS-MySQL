@@ -1,3 +1,4 @@
+```
 ROOT
 └── server
     ├── api
@@ -23,3 +24,4 @@ ROOT
     ├── database.js
     ├── routes.js
     └── seed.js
+```

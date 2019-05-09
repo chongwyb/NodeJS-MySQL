@@ -50,7 +50,7 @@ Start the application
 $ npm run start:dev
 ```
 
-### Unit tests
+## Unit tests
 Ensure that the SEED has been loaded before running the unit tests.
 
 To execute unit tests.

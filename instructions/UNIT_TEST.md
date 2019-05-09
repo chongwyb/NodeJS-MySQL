@@ -8,7 +8,9 @@ NOTE:
 - Valid Test Case 1-1 and Invalid Test Case 1-1 only works once when SEED is loaded.
 
 ### Custom unit tests
-To add or modify the test cases for each respective api routes, you can include them in /tests/valid/case<X>.js or /tests/invalid/case<X>.js.
+To add or modify the test cases for each respective api routes, you can set them in
+- /tests/valid/caseX.js
+- /tests/invalid/caseX.js
 
 Reload the SEED to test the new test cases.
 
