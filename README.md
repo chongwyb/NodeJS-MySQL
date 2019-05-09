@@ -26,14 +26,10 @@ Set your MYSQL DB connection parameters.
 ### MYSQL logging
 To enable MYSQL statement logging.
 ```javascript
-  MYSQL_LOGGING: false, // Set to true
+  MYSQL_LOGGING: true,
 ```
 
 ### Database initialisation
-To create the necessary tables.
-```javascript
-  INIT: false,
-```
 To drop and create the necessary tables.
 ```javascript
   INIT: true,
