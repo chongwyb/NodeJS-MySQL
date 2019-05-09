@@ -1,7 +1,7 @@
 ## Unit test
 
 ### Base unit tests
-The default test cases are separately into two sets, [valid](/tests/valid) and [invalid](/tests/invalid).
+The default test cases are separated into two sets, [valid](/tests/valid) and [invalid](/tests/invalid).
 
 NOTE:
 - Valid Test Cases are run in order to simulate an actual process.
