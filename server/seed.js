@@ -7,23 +7,23 @@ const Relationship = db.Relationship;
  * Initial database seed
  * 
  * Table: teachers
- * email
- * teacherA@example.com
- * teacherB@example.com
- * teacherC@example.com
+ * id | email
+ * 1  | teacherA@example.com
+ * 2  | teacherB@example.com
+ * 3  | teacherC@example.com
  * 
  * Table: students
- * email                | suspended
- * studentA@example.com | 0
- * studentB@example.com | 0
- * studentC@example.com | 0
+ * id | email                | suspended
+ * 1  | studentA@example.com | 0
+ * 2  | studentB@example.com | 0
+ * 3  | studentC@example.com | 0
  * 
  * Table: relationship
- * teacher_email        | student_email
- * teacherA@example.com | studentA@example.com
- * teacherA@example.com | studentC@example.com
- * teacherB@example.com | studentB@example.com
- * teacherB@example.com | studentC@example.com
+ * id | teacher_id | student_id
+ * 1  | 1          | 1
+ * 2  | 1          | 3
+ * 3  | 2          | 2
+ * 4  | 2          | 3
  */
 
 module.exports = async () => {
