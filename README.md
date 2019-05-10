@@ -1,4 +1,5 @@
 # NodeJS MySQL
+This application is developed with NodeJs and MYSQL where express and sequelize are used respectively to aid development. There are 4 API routes defined which demostrates the interactions between the server and database. The APIs only provide the Create, Read and Update functionalities.
 
 ## Prerequisites
 Refer to the setup guide [here](./instructions/SETUP.md) to install the necessary software tools.
