@@ -39,6 +39,7 @@ To create pseudo table records.
 ```javascript
   SEED: true,
 ```
+Work In Progress: [Sequelize Migration Seed](./seed)
 
 ## Launching the application
 Install the necessary NPM packages
