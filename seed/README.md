@@ -1,9 +1,10 @@
 # Database SEED initialisation
 
 ## Setup
-Documentation for migration can be found [here](http://docs.sequelizejs.com/manual/migrations.html)
+Documentation for migration can be found [here](http://docs.sequelizejs.com/manual/migrations.html).
 
 ## Usage
+The following commands are to be executed from `$ <path>/seed/` as sequelize-cli default configuration reads directly from the current working path.
 
 ### Creating Seed
 ```
